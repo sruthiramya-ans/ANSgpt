@@ -1,0 +1,75 @@
+LPILEP12
+TITLE
+Project: Porter Mill Solar Project
+
+Client: Urban Grid
+Engineer: SR
+Description: Inverter SG4400UD-MV-US Evenly spaced piles - Strong Axis
+OPTIONS
+Units USCS
+UseLRFD NO
+UseLayeringCorrection YES
+UseinSoilsofSameType YES
+ComputeEIOnly NO
+ComputePileLengthVariation NO
+Loading STATIC
+UsePYModifiers NO
+UsePileBatter NO
+UseTipShear NO
+UseDistributedLoading NO
+UseSoilMovement NO
+ConsiderConcentratedLoads NO
+ComputeKmatrix NO
+ComputePushover NO
+ComputePileBuckling NO
+NumberPileIncrements
+100
+IterationsLimit
+500
+MaxDeflectionLimit
+ 1.00000000000000E+0002
+ConvergenceTolerance
+ 1.00000000000000E-0005
+PrintPYCurves NO
+PrintSummaryOnly NO
+1 = Printing Increment 
+PrintNarrowReport NO
+ComputeShearCapacity NO
+ComputeInteraction NO
+END OPTIONS
+SECTIONS
+1 = Total  Number  of  Sections
+1 = Section Number
+15 = Section type =  steel H section, strong axis
+ 3.02500000000000E+0001 = Section length (ft)
+ 0.00000000000000E+0000 = Shear capacity at top of section (lbs)
+ 5.92870000000000E+0000 = H Section width (in)
+ 5.92870000000000E+0000 = H Section depth (in)
+ 1.98700000000000E-0001 = H Section flange thickness (in)
+ 1.68700000000000E-0001 = H Section web thickness (in)
+ 5.00000000000000E+0004 = yield stress of H section (psi)
+ 2.90000000000000E+0007 = modulus of H section (psi)
+Do not Compute ElastoPlastic Moment Curvature
+0 = Use Diameter/Width for p-y calculations
+SOIL LAYERS
+4 = number of soil layers
+6	 2.75000000000000E+0000	 4.25000000000000E+0000 = soil type number for Reese sand, Xtop (ft), Xbot(ft)
+ 1.15000000000000E+0002	 3.80000000000000E+0001	 2.10000000000000E+0002 = top gamma (pcf), phi (deg), k (pci) for sand
+ 1.15000000000000E+0002	 3.80000000000000E+0001	 2.10000000000000E+0002 = bot gamma (pcf), phi (deg), k (pci) for sand
+6	 4.25000000000000E+0000	 6.25000000000000E+0000 = soil type number for Reese sand, Xtop (ft), Xbot(ft)
+ 1.15000000000000E+0002	 3.80000000000000E+0001	 2.10000000000000E+0002 = top gamma (pcf), phi (deg), k (pci) for sand
+ 1.15000000000000E+0002	 3.80000000000000E+0001	 2.10000000000000E+0002 = bot gamma (pcf), phi (deg), k (pci) for sand
+5	 6.25000000000000E+0000	 1.02500000000000E+0001 = soil type number for stiff clay no water w/k, Xtop (ft), Xbot(ft)
+ 1.10000000000000E+0002	 2.25000000000000E+0003	 6.00000000000000E-0003	 7.50000000000000E+0002 = top gamma (pcf), c (psf), epsilon_50, k (pci) for stiff clay w/o free water w/ k
+ 1.10000000000000E+0002	 2.25000000000000E+0003	 6.00000000000000E-0003	 7.50000000000000E+0002 = bot gamma (pcf), c (psf), epsilon_50, k (pci) for stiff clay w/o free water w/ k
+6	 1.02500000000000E+0001	 3.02500000000000E+0001 = soil type number for Reese sand, Xtop (ft), Xbot(ft)
+ 5.00000000000000E+0001	 3.70000000000000E+0001	 1.10000000000000E+0002 = top gamma (pcf), phi (deg), k (pci) for sand
+ 5.00000000000000E+0001	 3.70000000000000E+0001	 1.10000000000000E+0002 = bot gamma (pcf), phi (deg), k (pci) for sand
+PILE BATTER AND GROUND SLOPE
+ 0.00000000000000E+0000 = Ground Slope (deg)
+ 0.00000000000000E+0000 = Ground Slope Left (deg)
+ 0.00000000000000E+0000 = Pile Batter  (deg)
+LOADING
+1 = Number of load cases
+1	1	 1.10300000000000E+0003	 0.00000000000000E+0000	 1.08570000000000E+0004	2	1 : Load 1; BC1:Shear (lb), Moment (in-lb);          Axial Load (lb); Compute Top y vs L: 1=no, 2=yes; Run Load Case: 1=yes, 2=no
+END

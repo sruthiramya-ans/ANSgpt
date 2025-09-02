@@ -1,0 +1,87 @@
+Input of data begun
+
+Reading title data
+Reading analysis options
+Reading section properties for Section 1
+Reading soil layering data
+Reading pile batter and ground slope angles
+Reading pile head loading data
+Reading of input data completed
+
+Output of input data begun
+
+This model was preapred by:
+SruthiRamya
+
+
+
+File Path and Names Used for Analysis:
+
+Path to file locations:       
+C:\Users\SruthiRamya\ANS Geo\ANS Geo Projects - Documents\3 - PROJECTS\Urban Grid\Porter Mills (MD)\6 - Reporting\Calcs\1. Inverter Foundation Design\2. LPile\Evenly spaced\
+
+Name of input data file:      
+Inverter_Evenly_Strong Axis_PM.lp12d
+
+Name of output report file:  
+Inverter_Evenly_Strong Axis_PM.lp12o
+
+Name of plot output file:     
+Inverter_Evenly_Strong Axis_PM.lp12p
+
+Name of runtime message file: 
+Inverter_Evenly_Strong Axis_PM.lp12r
+
+
+Output of input data completed
+
+Starting computation of nonlinear bending stiffness for section 1
+
+Completed computation of nonlinear bending stiffness for section 1
+
+Starting computations of layering depth corrections
+
+Computing lateral response of pile for load number 1
+Iteration 1,    Y(top) =  1.9708E-01, dYmax =  1.9708E-01 at node 2, Delta dYmax =  1.9708E-01
+Iteration 2,    Y(top) =  2.5503E-01, dYmax =  5.7952E-02 at node 2, Delta dYmax =  1.3913E-01
+Iteration 3,    Y(top) =  2.7921E-01, dYmax =  2.4183E-02 at node 2, Delta dYmax =  3.3768E-02
+Iteration 4,    Y(top) =  2.8821E-01, dYmax =  8.9920E-03 at node 2, Delta dYmax =  1.5191E-02
+Iteration 5,    Y(top) =  2.9159E-01, dYmax =  3.3809E-03 at node 2, Delta dYmax =  5.6112E-03
+Iteration 6,    Y(top) =  2.9283E-01, dYmax =  1.2439E-03 at node 2, Delta dYmax =  2.1370E-03
+Iteration 7,    Y(top) =  2.9329E-01, dYmax =  4.6132E-04 at node 2, Delta dYmax =  7.8257E-04
+Iteration 8,    Y(top) =  2.9347E-01, dYmax =  1.8251E-04 at node 2, Delta dYmax =  2.7881E-04
+Iteration 9,    Y(top) =  2.9355E-01, dYmax =  7.6458E-05 at node 2, Delta dYmax =  1.0605E-04
+Iteration 10,   Y(top) =  2.9358E-01, dYmax =  3.2675E-05 at node 2, Delta dYmax =  4.3783E-05
+Iteration 11,   Y(top) =  2.9360E-01, dYmax =  1.4044E-05 at node 2, Delta dYmax =  1.8631E-05
+Iteration 12,   Y(top) =  2.9360E-01, dYmax =  6.0455E-06 at node 2, Delta dYmax =  7.9988E-06
+
+The convergence criteria have been met for load case 1
+
+Computing top deflection vs. pile embedment length for load case 1.
+Computing lateral response of pile for load case number 1, trial length 1
+Computing lateral response of pile for load case number 1, trial length 2
+Computing lateral response of pile for load case number 1, trial length 3
+Computing lateral response of pile for load case number 1, trial length 4
+Computing lateral response of pile for load case number 1, trial length 5
+Computing lateral response of pile for load case number 1, trial length 6
+Computing lateral response of pile for load case number 1, trial length 7
+Computing lateral response of pile for load case number 1, trial length 8
+Computing lateral response of pile for load case number 1, trial length 9
+Computing lateral response of pile for load case number 1, trial length 10
+Computing lateral response of pile for load case number 1, trial length 11
+Computing lateral response of pile for load case number 1, trial length 12
+Computing lateral response of pile for load case number 1, trial length 13
+Computing lateral response of pile for load case number 1, trial length 14
+Computing lateral response of pile for load case number 1, trial length 15
+Computing lateral response of pile for load case number 1, trial length 16
+Computing lateral response of pile for load case number 1, trial length 17
+Computing lateral response of pile for load case number 1, trial length 18
+
+Completed Analysis for Load Case 1
+
+Completed Analysis of All Pile Loading Cases
+
+The analysis ended normally. 
+
+Runtime in moment-curvature computations = 0.021 seconds
+Total runtime for analysis               = 0.055 seconds
