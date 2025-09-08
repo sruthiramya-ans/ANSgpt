@@ -90,9 +90,63 @@ Private Sub CreateStaplerJobBSX()
     ts.WriteLine "</Jobs>"
     ts.Close
     
-    ' Run Stapler with the bsx file
-    Set wsh = CreateObject("WScript.Shell")
-    wsh.Run """" & staplerExe & """ """ & jobFile & """", 1, False
+     ' === Open BSX in Stapler (like double-click) ===
+    ShellExecute 0, "open", jobFile, vbNullString, vbNullString, 1
     
-    MsgBox "Stapler job created at " & jobFile, vbInformation
+    ' Create WScript.Shell object for activation & keystrokes
+    Set wsh = CreateObject("WScript.Shell")
+    ' Wait a few seconds for Stapler to open
+    WaitSeconds 3
+    
+    ' Try to activate Stapler window
+    Dim activated As Boolean, tEnd As Single
+    tEnd = Timer + 10
+    Do While Timer < tEnd And Not activated
+        DoEvents
+        activated = wsh.AppActivate("Bluebeam Stapler")
+        If Not activated Then activated = wsh.AppActivate("Stapler")
+    Loop
+    
+    ' === Send Ctrl+T to Staple ===
+    If activated Then
+        WaitSeconds 1
+        wsh.SendKeys "^{t}"   ' Ctrl+T
+    Else
+        MsgBox "Could not activate Stapler window.", vbCritical
+        Exit Sub
+    End If
+    
+    ' === Wait for merged PDF ===
+    tEnd = Timer + 60
+    Do While Timer < tEnd And Not fso.FileExists(outputPDF)
+        DoEvents
+        WaitSeconds 0.5
+    Loop
+    
+    ' === Close Stapler ===
+    wsh.AppActivate "Bluebeam Stapler"
+    WaitSeconds 0.5
+    wsh.SendKeys "%{F4}" ' Alt+F4
+    
+    If fso.FileExists(outputPDF) Then
+        MsgBox "Merged PDF created: " & outputPDF, vbInformation
+    Else
+        MsgBox "Merge failed or timed out.", vbExclamation
+    End If
+    
+    ' === Close Revu if the merged PDF was opened ===
+    WaitSeconds 1
+    If wsh.AppActivate("Bluebeam Revu") Then
+        WaitSeconds 0.5
+        wsh.SendKeys "%{F4}"  ' Alt+F4 to exit Revu
+    End If
+    
+    
+End Sub
+' === Helper wait function ===
+Private Sub WaitSeconds(ByVal seconds As Double)
+    Dim t As Single: t = Timer + seconds
+    Do While Timer < t
+        DoEvents
+    Loop
 End Sub

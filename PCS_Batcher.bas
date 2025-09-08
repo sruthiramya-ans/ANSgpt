@@ -92,8 +92,8 @@ Public Sub generateBatchList()
                                 batchDat.Offset(0, 16) = (embed + Dashboard.Range("Pile.Reveal")) * Right(shp, Len(shp) - InStr(1, shp, "X"))
                                 batchDat.Offset(0, 17) = Dashboard.Range("TOPL.selected.sMu")
                                 batchDat.Offset(0, 18) = Dashboard.Range("TOPL.selected.sVu")
-                                batchDat.Offset(0, 19) = "-" ' Dashboard.Range("TOPL.M_external_weak")
-                                batchDat.Offset(0, 20) = "-" ' Dashboard.Range("TOPL.Shear.Weak")
+                                batchDat.Offset(0, 19) = Dashboard.Range("TOPL.M_external_weak")
+                                batchDat.Offset(0, 20) = Dashboard.Range("TOPL.Shear.Weak")
                                 batchDat.Offset(0, 21) = Dashboard.Range("TOPL.selected.sPu")
                                 batchDat.Offset(0, 22) = Dashboard.Range("TOPL.selected.sTu")
                                 
@@ -200,7 +200,7 @@ Sub importBatchList()
     b = 103
     
     n = 0
-    fileCount = WorksheetFunction.CountA(BatchResults.Range("Batch.data").Columns(24).Cells)
+    fileCount = WorksheetFunction.CountA(BatchResults.Range("Batch.data").Columns(1).Cells)
 
     'For Each lpileName In BatchResults.Range("Batch.data").Columns(24).Cells
     For i = 7 To 7 + fileCount
@@ -247,6 +247,14 @@ Sub importBatchList()
             Dashboard.Range("Load.AGM.Weak") = lpileArrayWk(1, 8) 'AGMWk
             Dashboard.Range("Load.AGS.Weak") = lpileArrayWk(1, 9) 'AGSWk
             Dashboard.Range("Load.AMM.Weak") = lpileArrayWk(1, 5) 'AMMWk
+            
+            BatchResults.Cells(lpileName.row, 26) = lpileArray(1, 8) 'AGM
+            BatchResults.Cells(lpileName.row, 27) = lpileArray(1, 9) 'AGS
+            BatchResults.Cells(lpileName.row, 28) = lpileArray(1, 5) 'AMM
+            BatchResults.Cells(lpileName.row, 29) = lpileArrayWk(1, 8) 'AGMWk
+            BatchResults.Cells(lpileName.row, 30) = lpileArrayWk(1, 9) 'AGSWk
+            BatchResults.Cells(lpileName.row, 31) = lpileArrayWk(1, 5) 'AMMWk
+            
 '            Dashboard.Range("Load.AGM.Weak") = Dashboard.Range("TOPL.Moment.Weak") + Dashboard.Range("TOPL.Shear.Weak") * (Dashboard.Range("Pile.Reveal") * 12 + Dashboard.Range("Soil.Scour"))
 '            Dashboard.Range("Load.AGS.Weak") = Dashboard.Range("TOPL.Shear.Weak")
             Application.Calculate

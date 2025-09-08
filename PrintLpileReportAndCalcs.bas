@@ -1,52 +1,92 @@
 Attribute VB_Name = "PrintLpileReportAndCalcs"
-Sub ExportLPileReportsToPDF()
+Sub GenerateIndividualReportsAndStaplerBSXFiles()
+    Dim ws As Worksheet
+    Dim outputFolderName As String, folderPath As String, pileType As String, lpileFileNameStrong As String, lpileFileNameWeak As String
+    Dim lastRow As Long
+    Dim i As Long
+    Dim concatValue As String
+    
+    outputFolderName = EnsureFolderExists(Range("LPILE.Folder") & "\" & Range("Project.Name")) & "Output Reports\"
+    CreateDir (outputFolderName)
+    ' Set worksheet to work on
+    Set ws = ThisWorkbook.Sheets("Pile Menu")
+    
+    ' Find the last row with data in column A
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).row
+    
+    ' Loop through each row starting from row 7
+    For i = 7 To lastRow
+        folderPath = EnsureFolderExists(Range("LPILE.Folder") & "\" & Range("Project.Name")) & ws.Cells(i, 1).Value & "\"
+        pileType = ws.Cells(i, 1).Value & "-" & ws.Cells(i, 2).Value & "-Embed " & ws.Cells(i, 5).Value & "ft-" & ws.Cells(i, 3).Value & " mil-Soil " & ws.Cells(i, 10).Value & "-Scour " & ws.Cells(i, 11).Value
+        lpileFileNameStrong = ws.Cells(i, 1).Value & "-" & ws.Cells(i, 2).Value & "-Embed " & ws.Cells(i, 5).Value & "ft-" & ws.Cells(i, 3).Value & " mil-Soil " & ws.Cells(i, 10).Value & "-Scour " & ws.Cells(i, 11).Value & "Strong"
+        lpileFileNameWeak = ws.Cells(i, 1).Value & "-" & ws.Cells(i, 2).Value & "-Embed " & ws.Cells(i, 5).Value & "ft-" & ws.Cells(i, 3).Value & " mil-Soil " & ws.Cells(i, 10).Value & "-Scour " & ws.Cells(i, 11).Value & "Weak"
+        folderName = EnsureFolderExists(Range("LPILE.Folder") & "\" & Range("Project.Name")) & "Output Reports\" & ws.Cells(i, 1).Value & "\"
+    
+        ' Recalculate the application before printing
+        Dashboard.Range("Pile.Type") = ws.Cells(i, 1).Value
+        Dashboard.Range("Pile.Shape") = ws.Cells(i, 2).Value
+        Dashboard.Range("Pile.Galv") = ws.Cells(i, 3).Value
+        Dashboard.Range("Pile.Reveal") = ws.Cells(i, 4).Value
+        Dashboard.Range("Pile.Embed") = ws.Cells(i, 5).Value
+        Dashboard.Range("Scour.Zone") = ws.Cells(i, 11).Value
+        Dashboard.Range("Soil.Zone") = ws.Cells(i, 10).Value
+        
+        Dashboard.Range("Load.AGM") = ws.Cells(i, 12).Value
+        Dashboard.Range("Load.AGS") = ws.Cells(i, 13).Value
+        Dashboard.Range("Load.AMM") = ws.Cells(i, 14).Value
+        Dashboard.Range("Load.AGM.Weak") = ws.Cells(i, 15).Value
+        Dashboard.Range("Load.AGS.Weak") = ws.Cells(i, 16).Value
+        Dashboard.Range("Load.AMM.Weak") = ws.Cells(i, 17).Value
+        
+        Application.Calculate
+        Call CreateIndividualMergedReport(outputFolderName, folderPath, pileType, lpileFileNameStrong, lpileFileNameWeak)
+
+    Next i
+End Sub
+Sub CreateIndividualMergedReport(outputFolderName As String, folderPath As String, pileType As String, lpileFileNameStrong As String, lpileFileNameWeak As String)
     Dim fso As Object, folder As Object, file As Object, ts As Object
-    Dim folderPath As String, lpileFileName As String
-    Dim pdfPath_lpile_report As String, pdfPath_plot As String, objWord As Object, doc As Object
-    Dim reportFile As String, plotFile As String
+    Dim pdfPath_lpile_report_strong As String, pdfPath_lpile_report_weak As String, objWord As Object, doc As Object
+    Dim reportFileStrong As String, reportFileWeak As String
     Dim scriptPath As String, outputPDF As String
-    Dim pdfNames() As String, pdfs As Variant, i As Long
+    Dim pdfNames() As String, i As Long
     Dim bluebeamPath As String, cmd As String, line As String
     Dim newIndex As Long
     Dim BluebeamApp As Object
     Dim PDFDocument As Object, staplerPath As String, jobFile As String
-    
-    ' === Read folder path and LPile file name from Excel ===
-    folderPath = EnsureFolderExists(Range("LPILE.Folder") & "\" & Range("Project.Name")) & ThisWorkbook.Sheets("Pile Menu").Range("A7").Value & "\"
-    lpileFileName = ThisWorkbook.Sheets("Pile Menu").Range("A7").Value & "-" & ThisWorkbook.Sheets("Pile Menu").Range("B7").Value & "-Embed " & ThisWorkbook.Sheets("Pile Menu").Range("E7").Value & "ft-" & ThisWorkbook.Sheets("Pile Menu").Range("C7").Value & " mil-Soil " & ThisWorkbook.Sheets("Pile Menu").Range("J7").Value & "-Scour " & ThisWorkbook.Sheets("Pile Menu").Range("K7").Value & "Strong"
-    
+    Dim staplerExe As String
+    Dim pdfs(4) As String
+       
     ' Build expected file names
-    reportFile = folderPath & lpileFileName & ".lp12o"
-    plotFile = folderPath & lpileFileName & ".lp12p"
-    
+    reportFileStrong = folderPath & lpileFileNameStrong & ".lp12o"
+    reportFileWeak = folderPath & lpileFileNameWeak & ".lp12o"
     ' Create Word object
     Set objWord = CreateObject("Word.Application")
     objWord.Visible = False
     
-    ' === Export Report file (.lp12o) ===
-    If Dir(reportFile) <> "" Then
-        Set doc = objWord.Documents.Open(reportFile, ReadOnly:=True)
-        pdfPath_lpile_report = folderPath & lpileFileName & "_Report.pdf"
-        doc.ExportAsFixedFormat OutputFileName:=pdfPath_lpile_report, _
+    ' === Export Strong lpile Report file (.lp12o) ===
+    If Dir(reportFileStrong) <> "" Then
+        Set doc = objWord.Documents.Open(reportFileStrong, ReadOnly:=True)
+        pdfPath_lpile_report_strong = folderPath & lpileFileNameStrong & "_Report.pdf"
+        doc.ExportAsFixedFormat OutputFileName:=pdfPath_lpile_report_strong, _
                                 ExportFormat:=17 ' wdExportFormatPDF
         doc.Close False
     Else
-        MsgBox "Report file not found: " & reportFile, vbExclamation
+        MsgBox "Report file not found: " & reportFileStrong, vbExclamation
     End If
     
-    ' === Export Plot file (.lp12p) ===
-    If Dir(plotFile) <> "" Then
-        Set doc = objWord.Documents.Open(plotFile, ReadOnly:=True)
-        pdfPath_plots = folderPath & lpileFileName & "_Plots.pdf"
-        doc.ExportAsFixedFormat OutputFileName:=pdfPath_plots, _
+    ' === Export Weak lpile Report file (.lp12o) ===
+    If Dir(reportFileWeak) <> "" Then
+        Set doc = objWord.Documents.Open(reportFileWeak, ReadOnly:=True)
+        pdfPath_lpile_report_weak = folderPath & lpileFileNameWeak & "_Report.pdf"
+        doc.ExportAsFixedFormat OutputFileName:=pdfPath_lpile_report_weak, _
                                 ExportFormat:=17 ' wdExportFormatPDF
         doc.Close False
     Else
-        MsgBox "Plot file not found: " & plotFile, vbExclamation
+        MsgBox "Report file not found: " & reportFileWeak, vbExclamation
     End If
     
     ' === Export Specific Excel Sheets to PDF ===
-    ' List sheet names here (adjust as needed)
+    ' List sheet names here
     sheetNames = Array("AG", "AM", "Soil Axial")
     
      ' Redim array to hold pdf names
@@ -59,7 +99,7 @@ Sub ExportLPileReportsToPDF()
         On Error GoTo 0
         
         If Not ws Is Nothing Then
-            pdfNames(i) = folderPath & lpileFileName & "_" & ws.Name & ".pdf"
+            pdfNames(i) = folderPath & pileType & "_" & ws.Name & ".pdf"
             ws.Select
             ws.ExportAsFixedFormat Type:=xlTypePDF, _
                                    fileName:=pdfNames(i), _
@@ -74,178 +114,143 @@ Sub ExportLPileReportsToPDF()
         Set ws = Nothing
     Next i
     
-    ' === List of PDFs to merge (adjust paths as needed) ===
+    ' === List of PDFs to merge ===
     newIndex = UBound(pdfNames) + 1
     
     ' Resize array (Preserve keeps existing values)
     ReDim Preserve pdfNames(0 To newIndex)
     
     ' Add new value
-    pdfNames(newIndex) = pdfPath_lpile_report
+    pdfNames(newIndex) = pdfPath_lpile_report_strong
+    
+    ' === List of PDFs to merge ===
+    newIndex = UBound(pdfNames) + 1
+    
+    ' Resize array (Preserve keeps existing values)
+    ReDim Preserve pdfNames(0 To newIndex)
+    
+    ' Add new value
+    pdfNames(newIndex) = pdfPath_lpile_report_weak
     
     
-    outputPDF = folderPath & "Merged.pdf"
-    jobFile = folderPath & "MergeJob.job"
+    outputPDF = outputFolderName & pileType & "_Merged.pdf"
+    jobFile = folderPath & pileType & "_MergeJob.bsx"
     
-'    ' === Create Stapler job file ===
-'    Set fso = CreateObject("Scripting.FileSystemObject")
-'    Set ts = fso.CreateTextFile(jobFile, True)
-'
-'    ts.WriteLine "[Job]"
-'    ts.WriteLine "OutputFile=" & outputPDF
-'    ts.WriteLine "Files="
-'    For i = LBound(pdfNames) To UBound(pdfNames)
-'        ts.WriteLine pdfNames(i)
-'    Next i
-'    ts.Close
+    ' Path for stapler exe
+    staplerExe = "C:\Program Files\Bluebeam Software\Bluebeam Revu\21\Revu\Stapler.exe"
     
-    ' === Path to Stapler ===
-    staplerPath = "C:\Program Files\Bluebeam Software\Bluebeam Revu\21\Revu\Stapler.exe"
+    ' Input PDFs
+    pdfs(0) = pdfNames(0)  'excel sheet AG
+    pdfs(1) = pdfNames(1)  'excel sheet AM
+    pdfs(2) = pdfPath_lpile_report_strong  'Lpile report strong axis
+    pdfs(3) = pdfPath_lpile_report_weak  'Lpile report weak axis
+    pdfs(4) = pdfNames(2)  'excel sheet Soil Axial
     
-    ok = MergeWithBluebeamStapler(pdfNames, outputPDF, staplerPath, jobFile)
-
-    If ok Then
-        MsgBox "Merged successfully: " & outputPDF, vbInformation
-    Else
-        MsgBox "Merge failed or timed out." & vbCrLf & outputPDF, vbExclamation
-    End If
-    
-'    ' === Run Stapler with job file ===
-'    cmd = staplerPath & " /a """ & jobFile & """"
-'    Shell cmd, vbNormalFocus
-    
-''    scriptPath = folderPath & "MergedPDFs.txt"
-''
-''    ' === Build the Bluebeam script ===
-''    Set fso = CreateObject("Scripting.FileSystemObject")
-''    Set ts = fso.CreateTextFile(scriptPath, True)
-''
-''
-''    ts.WriteLine "CombinePDFs"
-''
-''    For i = LBound(pdfNames) To UBound(pdfNames)
-''        ts.WriteLine """" & pdfNames(i) & """"
-''    Next i
-''
-''    ts.WriteLine """" & outputPDF & """"
-''    ts.Close
-''
-''    ' === Path to Bluebeam Revu executable (adjust version if needed) ===
-''    bluebeamPath = """C:\Program Files\Bluebeam Software\Bluebeam Revu\21\Revu\Revu.exe"""
-''
-''    ' === Run Bluebeam with the script ===
-''    cmd = bluebeamPath & " /s " & """" & scriptPath & """"
-''    Shell cmd, vbNormalFocus
-'
-'    ' === Path to Bluebeam Stapler.exe (adjust if needed) ===
-'    staplerPath = """C:\Program Files\Bluebeam Software\Bluebeam Revu\21\Revu\Stapler.exe"""
-'
-'    ' === Build command line ===
-'    cmd = staplerPath
-'    For i = LBound(pdfNames) To UBound(pdfNames)
-'        cmd = cmd & " """ & pdfNames(i) & """"
-'    Next i
-'    cmd = cmd & " """ & outputPDF & """"   ' output at the end
-'
-'    ' === Run Stapler to merge PDFs ===
-'    Shell cmd, vbNormalFocus
-
-    
-    MsgBox "Merge started in Bluebeam. Check output: " & outputPDF, vbInformation
-End Sub
-
-
-' === Helper that does the heavy lifting ======================================
-Private Function MergeWithBluebeamStapler(pdfs As Variant, _
-                                          outputPDF As String, _
-                                          staplerExe As String, jobFile As String) As Boolean
-    Dim fso As Object, ts As Object, wsh As Object
-    Dim i As Long
-    Dim started As Boolean, activated As Boolean
-    Dim tEnd As Single
-
+    ' Create FileSystemObject
     Set fso = CreateObject("Scripting.FileSystemObject")
-    Set wsh = CreateObject("WScript.Shell")
-
-    ' Delete any existing output to avoid overwrite prompts
+    
+    ' Delete old files
     On Error Resume Next
     If fso.FileExists(outputPDF) Then fso.DeleteFile outputPDF, True
-    On Error GoTo 0
-
-    ' Create a temporary Stapler job file
-    Set ts = fso.CreateTextFile(jobFile, True)
-    ts.WriteLine "[Job]"
-    ts.WriteLine "OutputFile=" & outputPDF
-    ts.WriteLine "Files="
-    For i = LBound(pdfs) To UBound(pdfs)
-        ts.WriteLine CStr(pdfs(i))
-    Next i
-    ts.Close
-
-
-    For i = LBound(pdfs) To UBound(pdfs)
-        If LCase(fso.GetExtensionName(pdfs(i))) <> "pdf" Then
-            MsgBox "Unsupported file type: " & pdfs(i)
-            Exit Function
-        End If
-    Next i
-
-    ' Ensure no previous Stapler instance is running
-    wsh.Run "taskkill /IM Stapler.exe /F", 0, True
-    WaitSeconds 0.5 ' Give it a moment to close
-
-    ' Launch Stapler with the job file (interactive UI)
-    wsh.Run """" & staplerExe & """ """ & jobFile & """", 1, True
-
-    ' Try to activate the Stapler window (title can vary by version)
-    tEnd = Timer + 10    ' 10s to find the window
-    Do While Timer < tEnd And Not activated
-        DoEvents
-        activated = wsh.AppActivate("Bluebeam Stapler")
-        If Not activated Then activated = wsh.AppActivate("Stapler")
-    Loop
-
-    ' Press the Staple button:
-    '   - First try Alt+S (common accelerator for Staple)
-    '   - Then send Enter in case Staple is the default button
-    If activated Then
-        ' give it a beat to settle
-        WaitSeconds 0.5
-        wsh.SendKeys "%s"      ' Alt+S
-        WaitSeconds 0.5
-        wsh.SendKeys "~"       ' Enter (as a fallback)
-    End If
-
-    ' Wait up to 90s for output to appear
-    tEnd = Timer + 90
-    Do While Timer < tEnd And Not fso.FileExists(outputPDF)
-        DoEvents
-        WaitSeconds 0.25
-    Loop
-
-    MergeWithBluebeamStapler = fso.FileExists(outputPDF)
-
-    ' Optional: close Stapler
-    If activated Then
-        wsh.AppActivate "Bluebeam Stapler"
-        WaitSeconds 0.3
-        wsh.SendKeys "%{F4}"   ' Alt+F4
-    End If
-
-    ' Clean up temp job
-    On Error Resume Next
     If fso.FileExists(jobFile) Then fso.DeleteFile jobFile, True
     On Error GoTo 0
-    wsh.Run "taskkill /IM Stapler.exe /F", 0, True
+    
+    ' Create .bsx file
+    Set ts = fso.CreateTextFile(jobFile, True)
+    ts.WriteLine "<?xml version=""1.0"" encoding=""utf-8""?>"
+    ts.WriteLine "<Jobs>"
+    ts.WriteLine "  <Job>"
+    ts.WriteLine "    <OutputFileName>" & fso.GetFileName(outputPDF) & "</OutputFileName>"
+    ts.WriteLine "    <StampsOnAllPages />"
+    ts.WriteLine "    <OutputDir>" & fso.GetParentFolderName(outputPDF) & "</OutputDir>"
+    ts.WriteLine "    <JobOptions>"
+    ts.WriteLine "      <Name>Standard Document.joboptions</Name>"
+    ts.WriteLine "      <Width>-1</Width>"
+    ts.WriteLine "      <Height>-1</Height>"
+    ts.WriteLine "      <Orient>Auto</Orient>"
+    ts.WriteLine "      <UserRotation>0</UserRotation>"
+    ts.WriteLine "      <ImageCompression>Flate</ImageCompression>"
+    ts.WriteLine "      <ImageResolution>300</ImageResolution>"
+    ts.WriteLine "      <JpegQuality>75</JpegQuality>"
+    ts.WriteLine "      <ImageAliasingText>2</ImageAliasingText>"
+    ts.WriteLine "      <ImageAliasingGraphics>2</ImageAliasingGraphics>"
+    ts.WriteLine "      <LineMergeOn>False</LineMergeOn>"
+    ts.WriteLine "      <BlendMode>Darken</BlendMode>"
+    ts.WriteLine "      <BlendAlpha>1</BlendAlpha>"
+    ts.WriteLine "      <PDFPostProcess>False</PDFPostProcess>"
+    ts.WriteLine "      <PostProcessProcessMasks>False</PostProcessProcessMasks>"
+    ts.WriteLine "      <PostProcessFixStripedImageTransparency>False</PostProcessFixStripedImageTransparency>"
+    ts.WriteLine "      <PostProcessCombineAdjacentImages>False</PostProcessCombineAdjacentImages>"
+    ts.WriteLine "      <PostProcessOptimizeSolidImages>False</PostProcessOptimizeSolidImages>"
+    ts.WriteLine "      <PostProcessRemoveTextClipping>False</PostProcessRemoveTextClipping>"
+    ts.WriteLine "      <PostProcessSimplifyClippingPaths>False</PostProcessSimplifyClippingPaths>"
+    ts.WriteLine "      <PostProcessPDFVersion>Version_1_4</PostProcessPDFVersion>"
+    ts.WriteLine "    </JobOptions>"
+    ts.WriteLine "    <ColorDepth>4</ColorDepth>"
+    ts.WriteLine "    <OpenOutputFileAfter>True</OpenOutputFileAfter>"
+    ts.WriteLine "    <DeleteTempPS>False</DeleteTempPS>"
+    ts.WriteLine "    <Name />"
+    ts.WriteLine "    <Overwrite>0</Overwrite>"
+    ts.WriteLine "    <Delete>False</Delete>"
+    ts.WriteLine "    <InterpreterType />"
+    ts.WriteLine "    <LastError />"
+    ts.WriteLine "    <Unfiltered>False</Unfiltered>"
+    
+    ' Add SubJobs for each PDF
+    For i = 0 To UBound(pdfs)
+        ts.WriteLine "    <SubJob>"
+        ts.WriteLine "      <OriginalFileName>" & pdfs(i) & "</OriginalFileName>"
+        ts.WriteLine "      <InputFileName>" & pdfs(i) & "</InputFileName>"
+        ts.WriteLine "      <InputFileType>.pdf</InputFileType>"
+        ts.WriteLine "      <ExeName>Revu</ExeName>"
+        ts.WriteLine "      <ApplicationTitle />"
+        ts.WriteLine "      <PageSize />"
+        ts.WriteLine "      <Orientation />"
+        ts.WriteLine "      <Scale />"
+        ts.WriteLine "      <TransferBookmarks>False</TransferBookmarks>"
+        ts.WriteLine "      <TransferHyperlinks>False</TransferHyperlinks>"
+        ts.WriteLine "      <TransferFileProperties>False</TransferFileProperties>"
+        ts.WriteLine "      <Message />"
+        ts.WriteLine "      <Stamps />"
+        ts.WriteLine "    </SubJob>"
+    Next i
+    
+    ts.WriteLine "  </Job>"
+    ts.WriteLine "</Jobs>"
+    ts.Close
 
-End Function
+    'Call CreateStaplerJobBSX(outputPDF, jobFile, pileType, pdfNames(0), pdfNames(1), pdfPath_lpile_report_strong, pdfPath_lpile_report_weak, pdfNames(2))
 
-' Small wait helper that doesn't freeze Excel
-Private Sub WaitSeconds(ByVal seconds As Double)
-    Dim t As Single: t = Timer + seconds
-    Do While Timer < t
-        DoEvents
-    Loop
+End Sub
+Sub BatchStaplerJobBSX()
+    Dim ws As Worksheet
+    Dim outputFolderName As String, folderPath As String, pileType As String, pdfPath_lpile_report_strong As String, pdfPath_lpile_report_weak As String, outputPDF As String, jobFile As String
+    Dim lastRow As Long
+    Dim i As Long
+    Dim concatValue As String
+    Dim pdfNames(4) As String
+    
+    outputFolderName = EnsureFolderExists(Range("LPILE.Folder") & "\" & Range("Project.Name")) & "Output Reports\"
+    ' Set worksheet to work on
+    Set ws = ThisWorkbook.Sheets("Pile Menu")
+    
+    ' Find the last row with data in column A
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).row
+    
+    ' Loop through each row starting from row 7
+    For i = 7 To lastRow
+        folderPath = EnsureFolderExists(Range("LPILE.Folder") & "\" & Range("Project.Name")) & ws.Cells(i, 1).Value & "\"
+        pileType = ws.Cells(i, 1).Value & "-" & ws.Cells(i, 2).Value & "-Embed " & ws.Cells(i, 5).Value & "ft-" & ws.Cells(i, 3).Value & " mil-Soil " & ws.Cells(i, 10).Value & "-Scour " & ws.Cells(i, 11).Value
+        outputPDF = outputFolderName & pileType & "_Merged.pdf"
+        jobFile = folderPath & pileType & "_MergeJob.bsx"
+        pdfNames(0) = folderPath & pileType & "_AG.pdf"
+        pdfNames(1) = folderPath & pileType & "_AM.pdf"
+        pdfPath_lpile_report_strong = folderPath & pileType & "Weak_Report.pdf"
+        pdfPath_lpile_report_weak = folderPath & pileType & "Strong_Report.pdf"
+        pdfNames(2) = folderPath & pileType & "_Soil Axial.pdf"
+        Call CreateStaplerJobBSX(outputPDF, jobFile, pileType, pdfNames(0), pdfNames(1), pdfPath_lpile_report_strong, pdfPath_lpile_report_weak, pdfNames(2))
+    Next i
+
 End Sub
 
 
